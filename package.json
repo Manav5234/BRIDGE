@@ -1,0 +1,144 @@
+{
+  "name": "bridge",
+  "displayName": "Bridge",
+  "description": "Connects a conversational AI workflow to a locally running OpenCode instance.",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "bridge-local",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=20"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bridge.openChat",
+        "title": "Open Chat",
+        "category": "Bridge"
+      },
+      {
+        "command": "bridge.connect",
+        "title": "Connect to OpenCode",
+        "category": "Bridge"
+      },
+      {
+        "command": "bridge.disconnect",
+        "title": "Disconnect",
+        "category": "Bridge"
+      },
+      {
+        "command": "bridge.newSession",
+        "title": "New Session",
+        "category": "Bridge"
+      },
+      {
+        "command": "bridge.stopGeneration",
+        "title": "Stop Generation",
+        "category": "Bridge"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bridge",
+          "title": "Bridge",
+          "icon": "media/bridge.svg"
+        }
+      ]
+    },
+    "views": {
+      "bridge": [
+        {
+          "type": "webview",
+          "id": "bridge.chat",
+          "name": "Chat"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "bridge.newSession",
+          "when": "view == bridge.chat",
+          "group": "navigation@1"
+        },
+        {
+          "command": "bridge.connect",
+          "when": "view == bridge.chat",
+          "group": "navigation@2"
+        },
+        {
+          "command": "bridge.disconnect",
+          "when": "view == bridge.chat",
+          "group": "navigation@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Bridge",
+      "properties": {
+        "bridge.serverUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Base URL of an OpenCode server, for example `http://127.0.0.1:4096`. Leave empty to auto-detect the OpenCode background service (`opencode service status`). Only loopback URLs are allowed unless you enable `bridge.allowRemoteServer`."
+        },
+        "bridge.allowRemoteServer": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Allow `bridge.serverUrl` to point at a non-loopback host. Bridge sends your OpenCode credentials to that host over plain HTTP, so only enable this for a host you control."
+        },
+        "bridge.username": {
+          "type": "string",
+          "default": "opencode",
+          "description": "HTTP Basic auth username. OpenCode defaults to \"opencode\"."
+        },
+        "bridge.password": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "HTTP Basic auth password. Leave empty to read it from the OpenCode config file (`service.json`), which is what `opencode` writes when it starts its background service. A value here is stored in plain text in your VS Code settings."
+        },
+        "bridge.directory": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Directory to scope OpenCode sessions to. Leave empty to use the first workspace folder."
+        },
+        "bridge.requestTimeoutMs": {
+          "type": "number",
+          "default": 15000,
+          "description": "Timeout in milliseconds for individual OpenCode requests such as listing sessions."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "node scripts/bundle-check.mjs",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "package": "node esbuild.mjs --production && vsce package --no-dependencies",
+    "vscode:prepublish": "node esbuild.mjs --production"
+  },
+  "dependencies": {
+    "@opencode/client": "2.0.30"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
+  }
+}
